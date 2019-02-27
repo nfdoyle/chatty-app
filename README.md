@@ -16,6 +16,10 @@ open http://localhost:3000
 
 Uses websocket for real-time chatting, nicknames, and online participant count.
 
+### Screenshot
+
+!["Screenshot of urls page"](https://raw.githubusercontent.com/nfdoyle/chatty-app/master/build/Screenshot%20from%202019-02-26%2023-45-46.png)
+
 ### Dependencies
 
 * React
