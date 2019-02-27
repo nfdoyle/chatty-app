@@ -6,13 +6,7 @@ import MessageList from './MessageList.jsx';
 
 
 class NewMessageForm extends React.Component{
-  // constructor() {
-  //   super(); // SUPER IMPORTANT!  IF YOU LEAVE THIS OUT, STUFF BREAKS!
 
-  //   this.state = {
-  //     currentuser: this.props.currentuser
-  //   };
-  // }
   render(){
 
     const onSubmit = (evt) => {
@@ -28,7 +22,6 @@ class NewMessageForm extends React.Component{
       this.props.addMessage(newMessage);
 
       newMessageContent.value = '';
-      // newMessageUser.value = '';
     };
 
     return (
@@ -45,8 +38,6 @@ class ChatBar extends Component {
   render() {
     return (
     <footer className="chatbar">
-      {/* <input className="chatbar-username" placeholder="Your Name (Optional)" />
-      <input className="chatbar-message" placeholder="Type a message and hit ENTER" /> */}
       <NewMessageForm addMessage={this.props.addMessage} currentuser={this.props.currentuser} />
     </footer>
     );

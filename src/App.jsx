@@ -41,12 +41,8 @@ class App extends Component {
   }
 
   changeCount(message){
-    console.log('counter received!');
-    console.log(message.count);
-    console.log(message);
     
     if (message.content === '+'){
-      console.log(this.state.usercount);
       this.setState({
         usercount: (message.count),
       });
@@ -60,12 +56,7 @@ class App extends Component {
   }
 
   addMessage(message) {
-    console.log('add message start <---------');
-    // const oldMessages = this.state.messages;
-    // const newMessages = [...oldMessages, message];
-    // this.setState({ messages: newMessages });
     let data = message;
-    console.log('current user: '+this.state.currentuser);
     if (data.username == '' && data.content == ''){
       return
     }
@@ -73,9 +64,7 @@ class App extends Component {
       if (data.username == ''){
         data.username = 'Anonymous';
       }
-      console.log(this.state.currentuser);
       this.state.currentuser = data.username;
-      console.log(this.state.currentuser);
       data.type = 'incomingMessage';
       this.chattySocket.send(JSON.stringify(data));
       
@@ -97,12 +86,10 @@ class App extends Component {
       this.chattySocket.send(JSON.stringify(data));
 
     }
-    // this.chattySocket.send(JSON.stringify(message)); 
-    console.log('data sent!');
+
   }
 
   componentDidMount() {
-    console.log("componentDidMount <App />");
     const that = this;
     
     this.chattySocket = new WebSocket('ws://localhost:3001')
