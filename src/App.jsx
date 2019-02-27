@@ -3,9 +3,10 @@ import ReactDOM from 'react-dom';
 import Message from './Message.jsx';
 import MessageList from './MessageList.jsx';
 import ChatBar from './ChatBar.jsx';
+import UserCounter from './UserCounter.jsx';
 
 const appData = {
-  currentUser: {name: "Bob"}, // optional. if currentUser is not defined, it means the user is Anonymous
+  currentUser: {name: "$init"}, // optional. if currentUser is not defined, it means the user is Anonymous
   messages: [
     {
       id: 1,
@@ -26,7 +27,8 @@ class App extends Component {
 
     this.state = {
       messages: [],
-      currentuser: appData.currentUser
+      usercount: 0,
+      currentuser: appData.currentUser.name
     };
     this.addMessage = this.addMessage.bind(this);
     this.receiveMessage = this.receiveMessage.bind(this);
@@ -38,26 +40,71 @@ class App extends Component {
     this.setState({ messages: newMessages });
   }
 
+  changeCount(message){
+    console.log('counter received!');
+    console.log(message.count);
+    console.log(message);
+    
+    if (message.content === '+'){
+      console.log(this.state.usercount);
+      this.setState({
+        usercount: (message.count),
+      });
+      
+    }
+    if (message.content === '-'){
+      this.setState({
+        usercount: (message.count),
+      });
+    }
+  }
+
   addMessage(message) {
+    console.log('add message start <---------');
     // const oldMessages = this.state.messages;
     // const newMessages = [...oldMessages, message];
     // this.setState({ messages: newMessages });
-    this.chattySocket.send(JSON.stringify(message)); 
+    let data = message;
+    console.log('current user: '+this.state.currentuser);
+    if (data.username == '' && data.content == ''){
+      return
+    }
+    if (data.username == this.state.currentuser || this.state.currentuser == '$init') {
+      if (data.username == ''){
+        data.username = 'Anonymous';
+      }
+      console.log(this.state.currentuser);
+      this.state.currentuser = data.username;
+      console.log(this.state.currentuser);
+      data.type = 'incomingMessage';
+      this.chattySocket.send(JSON.stringify(data));
+      
+    }else if (data.content == ''){
+      data.content = this.state.currentuser;
+      this.state.currentuser = data.username;
+      data.type = 'incomingNotification';
+      this.chattySocket.send(JSON.stringify(data));
+    }else {
+      let contentTemp = data.content;
+      data.content = this.state.currentuser;
+      this.state.currentuser = data.username;
+      data.type = 'incomingNotification';
+      this.chattySocket.send(JSON.stringify(data));
+
+      data = message;
+      data.content = contentTemp;
+      data.type = 'incomingMessage';
+      this.chattySocket.send(JSON.stringify(data));
+
+    }
+    // this.chattySocket.send(JSON.stringify(message)); 
     console.log('data sent!');
   }
 
   componentDidMount() {
     console.log("componentDidMount <App />");
     const that = this;
-    setTimeout(() => {
-      console.log("Simulating incoming message");
-      // Add a new message to the list of messages in the data store
-      const newMessage = {id: 3, username: "Michelle", content: "Hello there!"};
-      const messages = this.state.messages.concat(newMessage)
-      // Update the state of the app component.
-      // Calling setState will trigger a call to render() in App and all child components.
-      this.setState({messages: messages})
-    }, 3000);
+    
     this.chattySocket = new WebSocket('ws://localhost:3001')
 
     this.chattySocket.onopen = function () {
@@ -65,28 +112,22 @@ class App extends Component {
     
     }
     this.chattySocket.onmessage = function (event) {
-      console.log(JSON.parse(event.data));
-      console.log('received success');
-      console.log(this);
-      that.receiveMessage(JSON.parse(event.data));
-      const data = JSON.parse(event.data);
-      switch(data.type) {
-        case "incomingMessage":
-          // handle incoming message
-          break;
-        case "incomingNotification":
-          // handle incoming notification
-          break;
-        default:
-          // show an error in the console if the message type is unknown
-          throw new Error("Unknown event type " + data.type);
+      const msg = JSON.parse(event.data);
+      if (msg.type === 'incomingCount'){
+        that.changeCount(msg);
+      }else {
+        that.receiveMessage(msg);
       }
+      
+      
+      
     }
   }
   
   render() {
     return (
       <div className='app-container'>
+      <UserCounter usercount={this.state.usercount} />
       <MessageList messages={this.state.messages} />
       <ChatBar addMessage={this.addMessage} currentuser={this.state.currentuser} />
       </div>
