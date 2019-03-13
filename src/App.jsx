@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
 import Message from './Message.jsx';
+import NavBar from './NavBar.jsx';
 import MessageList from './MessageList.jsx';
 import ChatBar from './ChatBar.jsx';
 import UserCounter from './UserCounter.jsx';
@@ -34,12 +35,14 @@ class App extends Component {
     this.receiveMessage = this.receiveMessage.bind(this);
   }
 
+  //Receives new message to be appended to messages in state
   receiveMessage(message) {
     const oldMessages = this.state.messages;
     const newMessages = [...oldMessages, message];
     this.setState({ messages: newMessages });
   }
 
+  //Detects WS pings to update online user count
   changeCount(message){
     
     if (message.content === '+'){
@@ -55,6 +58,7 @@ class App extends Component {
     }
   }
 
+  // Handles form input and sends appropriate data to server
   addMessage(message) {
     let data = message;
     if (data.username == '' && data.content == ''){
@@ -64,19 +68,19 @@ class App extends Component {
       if (data.username == ''){
         data.username = 'Anonymous';
       }
-      this.state.currentuser = data.username;
+      this.setState({ currentuser: data.username });
       data.type = 'incomingMessage';
       this.chattySocket.send(JSON.stringify(data));
       
     }else if (data.content == ''){
       data.content = this.state.currentuser;
-      this.state.currentuser = data.username;
+      this.setState({ currentuser: data.username });
       data.type = 'incomingNotification';
       this.chattySocket.send(JSON.stringify(data));
     }else {
       let contentTemp = data.content;
       data.content = this.state.currentuser;
-      this.state.currentuser = data.username;
+      this.setState({ currentuser: data.username });
       data.type = 'incomingNotification';
       this.chattySocket.send(JSON.stringify(data));
 
@@ -114,7 +118,7 @@ class App extends Component {
   render() {
     return (
       <div className='app-container'>
-      <UserCounter usercount={this.state.usercount} />
+      <NavBar usercount={this.state.usercount} />
       <MessageList messages={this.state.messages} />
       <ChatBar addMessage={this.addMessage} currentuser={this.state.currentuser} />
       </div>
